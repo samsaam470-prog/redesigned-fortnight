@@ -221,3 +221,32 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# --- COLLIN LIGHTWEIGHT FIX: Background open, never in front ---
+    def open_in_background(self, url):
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.options import Options
+            opts = Options()
+            opts.add_argument("--start-minimized")
+            opts.add_argument("--window-position=-32000,-32000")
+            opts.add_argument("--no-focus")
+            opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+            driver = webdriver.Chrome(options=opts)
+            driver.get(url)
+            time.sleep(3)
+            src = driver.page_source
+            # don't close, keep in background
+            return src
+        except Exception as e:
+            print(f"[COLLIN] Background open failed: {e}")
+            return ""
+
+    def scrape_gemini_caption(self):
+        try:
+            # Gemini Live caption divs are usually [data-captions] or aria-live
+            captions = self.driver.find_elements("css selector", "[aria-live='polite'],.caption,.live-caption")
+            return " ".join([c.text for c in captions if c.text]) if captions else ""
+        except:
+            return ""
